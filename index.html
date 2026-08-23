@@ -50,12 +50,72 @@
             100% { transform: translate(0, 0) rotate(0deg); }
         }
 
+        /* Menu de Navegação Superior */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            animation: fadeInDown 1.2s ease-out forwards;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .menu {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2.5rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .menu a {
+            color: rgba(255, 255, 255, 0.92);
+            text-decoration: none;
+            font-size: 0.95rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: #fff;
+            transition: width 0.3s ease;
+        }
+
+        .menu a:hover {
+            color: #ffffff;
+        }
+
+        .menu a:hover::after {
+            width: 100%;
+        }
+
+        @keyframes fadeInDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .container {
             position: relative;
             z-index: 10;
             text-align: center;
             padding: 2rem;
             max-width: 90%;
+            margin-top: 4rem;
         }
 
         .logo-wrapper {
@@ -107,7 +167,6 @@
             animation: fadeInUp 1.5s ease-out forwards;
             opacity: 0;
             transform: translateY(30px);
-            animation-delay: 0.3s;
             text-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
 
@@ -120,32 +179,7 @@
             animation: fadeInUp 1.5s ease-out forwards;
             opacity: 0;
             transform: translateY(30px);
-            animation-delay: 0.6s;
-            margin-bottom: 3rem;
-        }
-
-        .botao-acao {
-            display: inline-block;
-            padding: 1rem 3rem;
-            background: rgba(255, 255, 255, 0.18);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            border-radius: 50px;
-            font-size: 1rem;
-            letter-spacing: 0.15em;
-            text-decoration: none;
-            transition: all 0.4s ease;
-            backdrop-filter: blur(12px);
-            animation: fadeInUp 1.5s ease-out forwards;
-            opacity: 0;
-            transform: translateY(30px);
-            animation-delay: 0.9s;
-        }
-
-        .botao-acao:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            animation-delay: 0.3s;
         }
 
         @keyframes fadeInUp {
@@ -157,6 +191,12 @@
 
         /* Responsividade */
         @media (max-width: 768px) {
+            .menu {
+                gap: 1.2rem;
+            }
+            .menu a {
+                font-size: 0.85rem;
+            }
             .imagem-central {
                 max-width: 280px;
             }
@@ -169,19 +209,36 @@
         }
 
         @media (max-width: 480px) {
+            nav {
+                padding: 1rem;
+            }
+            .menu {
+                gap: 0.8rem 1.2rem;
+            }
+            .menu a {
+                font-size: 0.78rem;
+            }
             .imagem-central {
                 max-width: 220px;
             }
             .container {
                 padding: 1rem;
             }
-            .botao-acao {
-                padding: 0.85rem 2rem;
-            }
         }
     </style>
 </head>
 <body>
+
+    <!-- Menu de Navegação Superior -->
+    <nav>
+        <ul class="menu">
+            <li><a href="#entrar">Entrar</a></li>
+            <li><a href="#suporte">Suporte</a></li>
+            <li><a href="#revendedor">Revendedor</a></li>
+            <li><a href="#informacoes">Informações</a></li>
+            <li><a href="#contatos">Contatos</a></li>
+        </ul>
+    </nav>
 
     <div class="container">
         <div class="logo-wrapper">
@@ -190,9 +247,7 @@
         </div>
 
         <h1>AQUAVIBES</h1>
-        <p class="slogan">Onde a tecnologia se une a natureza</p>
-
-        <a href="#" class="botao-acao">A G U A R D E</a>
+        <p class="slogan">Onde a tecnologia se une à natureza</p>
     </div>
 
 </body>
