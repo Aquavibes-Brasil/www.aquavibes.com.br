@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaVibes - Controle Inteligente</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        /* Animação de piscar rápido */
+        @keyframes piscarRapido {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .texto-normal {
+            color: #3b82f6; /* Azul */
+        }
+        .texto-alerta {
+            color: #ef4444; /* Vermelho */
+            animation: piscarRapido 0.5s infinite; /* Piscada rápida */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-gray-100 font-sans">
+
+    <!-- Tela de Acesso -->
+    <div id="telaAcesso" class="min-h-screen flex items-center justify-center px-4">
+        <div class="w-full max-w-md bg-slate-800 p-8 rounded-2xl shadow-xl">
+            <div class="text-center mb-6">
+                <i class="fa fa-tint text-5xl text-cyan-400"></i>
+                <h2 class="text-2xl font-bold mt-3 texto-normal">AquaVibes</h2>
+                <p class="texto-normal">Sistema de Monitoramento</p>
+            </div>
+
+            <div id="formLogin" class="space-y-4">
+                <input type="text" id="usuario" placeholder="Usuário" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <input type="password" id="senha" placeholder="Senha" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <button onclick="entrar()" class="w-full p-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-semibold transition">Entrar</button>
+                <p id="msgAcesso" class="text-center mt-2 text-sm"></p>
+                <p class="text-center texto-normal mt-4">Primeiro acesso? <a href="#" onclick="mostrarCadastro()" class="text-cyan-400">Cadastrar</a></p>
+            </div>
+
+            <div id="formCadastro" class="space-y-4 hidden">
+                <h3 class="text-xl text-center text-cyan-300 mb-2">Cadastro de Acesso</h3>
+                <input type="text" id="novoUsuario" placeholder="Escolha seu usuário" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <input type="password" id="novaSenha" placeholder="Escolha sua senha" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <input type="password" id="confirmaSenha" placeholder="Confirme a senha" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                
+                <div class="relative">
+                    <input type="text" id="idDispositivoCadastro" placeholder="ID do Dispositivo (ex: AquaVibes_...)" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 pr-12">
+                    <button type="button" onclick="abrirLeitorQR()" class="absolute right-2 top-1/2 -translate-y-1/2 text-cyan-400 hover:text-cyan-300 text-xl" title="Ler QR Code">
+                        <i class="fa fa-qrcode"></i>
+                    </button>
+                </div>
+
+                <button onclick="cadastrar()" class="w-full p-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition">Salvar Cadastro</button>
+                <p id="msgCadastro" class="text-center mt-2 text-sm"></p>
+                <p class="text-center texto-normal mt-4">Já tem cadastro? <a href="#" onclick="mostrarLogin()" class="text-cyan-400">Fazer login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Leitor QR -->
+    <div id="modalLeitorQR" class="fixed inset-0 bg-black/90 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-slate-800 p-6 rounded-xl w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-cyan-300">Leitura de QR Code</h3>
+                <button onclick="fecharLeitorQR()" class="texto-normal hover:text-white text-xl">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div id="leitorQR" class="w-full h-64 bg-slate-700 rounded-lg overflow-hidden"></div>
+            <p class="text-center text-sm texto-normal mt-3">Aponte a câmera para o código QR do dispositivo</p>
+        </div>
+    </div>
+
+    <!-- Tela Principal -->
+    <div id="telaPrincipal" class="hidden p-6 max-w-7xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8">
+            <div class="flex items-center gap-3">
+                <i class="fa fa-tint text-3xl text-cyan-400"></i>
+                <h1 class="text-2xl font-bold texto-normal">AquaVibes <span id="idDisp" class="text-cyan-400"></span></h1>
+            </div>
+            <div class="flex items-center gap-3 mt-4 md:mt-0">
+                <span id="statusDispositivo" class="text-sm font-medium"></span>
+                <button onclick="abrirAlterarSenha()" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-sm">Alterar Senha</button>
+                <button onclick="sair()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">Sair</button>
+            </div>
+        </header>
+
+        <!-- Cards de Sensores -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-slate-800 p-6 rounded-xl shadow-lg border-l-4 border-cyan-500">
+                <h3 class="texto-normal">Temperatura</h3>
+                <p class="text-4xl font-bold mt-2"><span id="temp">--</span> °C</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-xl shadow-lg border-l-4 border-green-500">
+                <h3 class="texto-normal">pH da Água</h3>
+                <p class="text-4xl font-bold mt-2"><span id="ph">--</span></p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-xl shadow-lg border-l-4 border-amber-500">
+                <h3 class="texto-normal">Turbidez</h3>
+                <p class="text-4xl font-bold mt-2"><span id="turb">--</span> NTU</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
+                <h3 class="texto-normal">Nível de Água</h3>
+                <p class="text-4xl font-bold mt-2"><span id="nivelTexto">--</span></p>
+            </div>
+        </div>
+
+        <!-- Controles e Programação -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-slate-800 p-6 rounded-xl shadow-lg">
+                <h3 class="text-xl font-semibold mb-4 text-cyan-300">Controles</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-slate-700 rounded-lg">
+                        <span class="texto-normal">Iluminação</span>
+                        <button onclick="alternar('iluminacao')" id="btnIlum" class="px-4 py-1 rounded bg-gray-600">Desligado</button>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-slate-700 rounded-lg">
+                        <span class="texto-normal">Saída Aux. 01</span>
+                        <button onclick="alternar('rele1')" id="btnR1" class="px-4 py-1 rounded bg-gray-600">Desligado</button>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-slate-700 rounded-lg">
+                        <span class="texto-normal">Saída Aux. 02</span>
+                        <button onclick="alternar('rele2')" id="btnR2" class="px-4 py-1 rounded bg-gray-600">Desligado</button>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-slate-700 rounded-lg">
+                        <span class="texto-normal">Saída Aux. 03</span>
+                        <button onclick="alternar('rele3')" id="btnR3" class="px-4 py-1 rounded bg-gray-600">Desligado</button>
+                    </div>
+                    <button onclick="acionarAlimentador()" class="w-full p-3 bg-orange-600 hover:bg-orange-700 rounded-lg font-semibold mt-4">
+                        <i class="fa fa-cutlery mr-2"></i> Alimentar Agora
+                    </button>
+                    <p class="text-sm texto-normal mt-2">Última alimentação: <span id="ultimaAlim">--</span></p>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-6 rounded-xl shadow-lg">
+                <h3 class="text-xl font-semibold mb-4 text-cyan-300">Programação Automática</h3>
+                <div class="space-y-4">
+                    <label class="texto-normal">Horário para alimentar diariamente:</label>
+                    <input type="time" id="horarioAlim" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600">
+                    <button onclick="salvarHorario()" class="w-full p-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold">Salvar Horário</button>
+                    <p class="text-sm texto-normal mt-2">O sistema aciona automaticamente no horário definido.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Alterar Senha -->
+    <div id="modalSenha" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-800 p-6 rounded-xl w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4 text-cyan-300">Alterar Senha</h3>
+            <input type="password" id="senhaAtual" placeholder="Senha atual" class="w-full p-3 mb-3 rounded-lg bg-slate-700 border border-slate-600">
+            <input type="password" id="novaSenhaAlt" placeholder="Nova senha" class="w-full p-3 mb-3 rounded-lg bg-slate-700 border border-slate-600">
+            <input type="password" id="confirmaSenhaAlt" placeholder="Confirme nova senha" class="w-full p-3 mb-4 rounded-lg bg-slate-700 border border-slate-600">
+            <div class="flex gap-3">
+                <button onclick="salvarNovaSenha()" class="flex-1 p-2 bg-cyan-600 rounded-lg">Salvar</button>
+                <button onclick="fecharModalSenha()" class="flex-1 p-2 bg-gray-600 rounded-lg">Cancelar</button>
+            </div>
+            <p id="msgSenha" class="text-center mt-3 text-sm"></p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDV6RsVkCORj9krfMKwHxvAcZ1KuLE63Uk",
+            authDomain: "aquavibes-4c90b.firebaseapp.com",
+            databaseURL: "https://aquavibes-4c90b-default-rtdb.firebaseio.com/",
+            projectId: "aquavibes-4c90b",
+            storageBucket: "aquavibes-4c90b.firebasestorage.app",
+            messagingSenderId: "135879785949",
+            appId: "1:135879785949:web:9ad421be35289e02754a34"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        let dispositivoAtual = "";
+        let leitorQR = null;
+        let intervaloStatus = null;
+
+        // Limites seguros dos sensores
+        const LIMITE_TEMP_MIN = 22;
+        const LIMITE_TEMP_MAX = 28;
+        const LIMITE_PH_MIN = 6.5;
+        const LIMITE_PH_MAX = 8.0;
+        const LIMITE_TURBIDEZ_MAX = 5; // Acima de 5 NTU = alerta
+
+        function mostrarLogin() {
+            document.getElementById("formLogin").classList.remove("hidden");
+            document.getElementById("formCadastro").classList.add("hidden");
+            limparMensagens();
+        }
+
+        function mostrarCadastro() {
+            document.getElementById("formLogin").classList.add("hidden");
+            document.getElementById("formCadastro").classList.remove("hidden");
+            limparMensagens();
+        }
+
+        function trocarTelaPrincipal(mostrar) {
+            document.getElementById("telaAcesso").classList.toggle("hidden", mostrar);
+            document.getElementById("telaPrincipal").classList.toggle("hidden", !mostrar);
+            if (!mostrar && intervaloStatus) {
+                clearInterval(intervaloStatus);
+                intervaloStatus = null;
+            }
+        }
+
+        function limparMensagens() {
+            document.getElementById("msgAcesso").textContent = "";
+            document.getElementById("msgCadastro").textContent = "";
+            document.getElementById("msgSenha").textContent = "";
+        }
+
+        function abrirLeitorQR() {
+            document.getElementById("modalLeitorQR").classList.remove("hidden");
+            leitorQR = new Html5Qrcode("leitorQR");
+            leitorQR.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (textoLido) => {
+                    document.getElementById("idDispositivoCadastro").value = textoLido.trim();
+                    fecharLeitorQR();
+                },
+                () => {}
+            ).catch(() => {
+                alert("Permita o acesso à câmera!");
+                fecharLeitorQR();
+            });
+        }
+
+        function fecharLeitorQR() {
+            if (leitorQR) { leitorQR.stop().catch(() => {}); leitorQR = null; }
+            document.getElementById("modalLeitorQR").classList.add("hidden");
+        }
+
+        async function entrar() {
+            const usuario = document.getElementById("usuario").value.trim();
+            const senha = document.getElementById("senha").value.trim();
+            const msg = document.getElementById("msgAcesso");
+            limparMensagens();
+
+            if (!usuario || !senha) { msg.textContent = "Preencha todos os campos"; msg.className = "text-red-400"; return; }
+
+            const snapshot = await db.ref("dispositivos").orderByChild("credenciais/usuario").equalTo(usuario).once("value");
+            if (!snapshot.exists()) { msg.textContent = "Usuário não encontrado"; msg.className = "text-red-400"; return; }
+
+            const dados = snapshot.val();
+            const id = Object.keys(dados)[0];
+            if (dados[id].credenciais.senha !== senha) { msg.textContent = "Senha incorreta"; msg.className = "text-red-400"; return; }
+
+            dispositivoAtual = id;
+            document.getElementById("idDisp").textContent = id;
+            trocarTelaPrincipal(true);
+            iniciarMonitoramento();
+            iniciarVerificacaoStatus();
+        }
+
+        async function cadastrar() {
+            const usuario = document.getElementById("novoUsuario").value.trim();
+            const senha = document.getElementById("novaSenha").value.trim();
+            const confirma = document.getElementById("confirmaSenha").value.trim();
+            const idDisp = document.getElementById("idDispositivoCadastro").value.trim();
+            const msg = document.getElementById("msgCadastro");
+            limparMensagens();
+
+            if (!usuario || !senha || !confirma || !idDisp) { msg.textContent = "Preencha todos os campos"; msg.className = "text-red-400"; return; }
+            if (senha !== confirma) { msg.textContent = "Senhas não coincidem"; msg.className = "text-red-400"; return; }
+
+            const snapshot = await db.ref(`dispositivos/${idDisp}`).once("value");
+            if (!snapshot.exists()) { msg.textContent = "Dispositivo não encontrado"; msg.className = "text-red-400"; return; }
+
+            const dadosDisp = snapshot.val();
+            if (dadosDisp.credenciais.usuario !== "") { msg.textContent = "Dispositivo já cadastrado"; msg.className = "text-red-400"; return; }
+
+            await db.ref(`dispositivos/${idDisp}/credenciais`).update({ usuario: usuario, senha: senha });
+            msg.textContent = "✅ Cadastro realizado! Faça login.";
+            msg.className = "text-green-400";
+            setTimeout(mostrarLogin, 2500);
+        }
+
+        function abrirAlterarSenha() { document.getElementById("modalSenha").classList.remove("hidden"); }
+        function fecharModalSenha() { document.getElementById("modalSenha").classList.add("hidden"); limparMensagens(); }
+
+        async function salvarNovaSenha() {
+            const atual = document.getElementById("senhaAtual").value.trim();
+            const nova = document.getElementById("novaSenhaAlt").value.trim();
+            const confirma = document.getElementById("confirmaSenhaAlt").value.trim();
+            const msg = document.getElementById("msgSenha");
+            limparMensagens();
+
+            if (!atual || !nova || !confirma) { msg.textContent = "Preencha todos os campos"; msg.className = "text-red-400"; return; }
+            if (nova !== confirma) { msg.textContent = "Novas senhas não coincidem"; msg.className = "text-red-400"; return; }
+
+            const snapshot = await db.ref(`dispositivos/${dispositivoAtual}/credenciais`).once("value");
+            const cred = snapshot.val();
+            if (cred.senha !== atual) { msg.textContent = "Senha atual incorreta"; msg.className = "text-red-400"; return; }
+
+            await db.ref(`dispositivos/${dispositivoAtual}/credenciais`).update({ senha: nova });
+            msg.textContent = "✅ Senha alterada!";
+            msg.className = "text-green-400";
+            setTimeout(fecharModalSenha, 2000);
+        }
+
+        function iniciarVerificacaoStatus() {
+            verificarStatusDispositivo();
+            intervaloStatus = setInterval(verificarStatusDispositivo, 30000);
+        }
+
+        async function verificarStatusDispositivo() {
+            if (!dispositivoAtual) return;
+            try {
+                const snapshot = await db.ref(`dispositivos/${dispositivoAtual}/status/ultimaAtualizacao`).once("value");
+                const ultimaAtualizacao = snapshot.val();
+                const elementoStatus = document.getElementById("statusDispositivo");
+
+                if (!ultimaAtualizacao) {
+                    elementoStatus.textContent = "Offline";
+                    elementoStatus.className = "text-red-500 font-semibold";
+                    return;
+                }
+
+                const diferencaMinutos = (Date.now() - ultimaAtualizacao) / 60000;
+                if (diferencaMinutos > 2) {
+                    elementoStatus.textContent = "Offline";
+                    elementoStatus.className = "text-red-500 font-semibold";
+                } else {
+                    elementoStatus.textContent = "Online";
+                    elementoStatus.className = "text-green-500 font-semibold";
+                }
+            } catch {
+                document.getElementById("statusDispositivo").textContent = "Erro";
+                document.getElementById("statusDispositivo").className = "text-yellow-500 font-semibold";
+            }
+        }
+
+        function iniciarMonitoramento() {
+            const ref = db.ref(`dispositivos/${dispositivoAtual}`);
+            ref.on("value", (snap) => {
+                const dados = snap.val();
+                if (!dados) return;
+
+                // Temperatura
+                const tempEl = document.getElementById("temp");
+                const tempValor = dados.sensores?.temperatura;
+                if (tempValor !== undefined && tempValor !== null) {
+                    const tempFormatado = tempValor.toFixed(1);
+                    tempEl.textContent = tempFormatado;
+                    tempEl.className = (tempValor < LIMITE_TEMP_MIN || tempValor > LIMITE_TEMP_MAX) 
+                        ? "texto-alerta text-4xl font-bold mt-2" 
+                        : "texto-normal text-4xl font-bold mt-2";
+                } else {
+                    tempEl.textContent = "--";
+                    tempEl.className = "texto-normal text-4xl font-bold mt-2";
+                }
+
+                // pH
+                const phEl = document.getElementById("ph");
+                const phValor = dados.sensores?.ph;
+                if (phValor !== undefined && phValor !== null) {
+                    const phFormatado = phValor.toFixed(2);
+                    phEl.textContent = phFormatado;
+                    phEl.className = (phValor < LIMITE_PH_MIN || phValor > LIMITE_PH_MAX) 
+                        ? "texto-alerta text-4xl font-bold mt-2" 
+                        : "texto-normal text-4xl font-bold mt-2";
+                } else {
+                    phEl.textContent = "--";
+                    phEl.className = "texto-normal text-4xl font-bold mt-2";
+                }
+
+                // Turbidez
+                const turbEl = document.getElementById("turb");
+                const turbValor = dados.sensores?.turbidez;
+                if (turbValor !== undefined && turbValor !== null) {
+                    const turbFormatado = turbValor.toFixed(0);
+                    turbEl.textContent = turbFormatado;
+                    turbEl.className = (turbValor > LIMITE_TURBIDEZ_MAX) 
+                        ? "texto-alerta text-4xl font-bold mt-2" 
+                        : "texto-normal text-4xl font-bold mt-2";
+                } else {
+                    turbEl.textContent = "--";
+                    turbEl.className = "texto-normal text-4xl font-bold mt-2";
+                }
+
+                // Nível de Água
+                const nivelEl = document.getElementById("nivelTexto");
+                const nivelValor = dados.sensores?.nivelTexto ?? "--";
+                nivelEl.textContent = nivelValor;
+                nivelEl.className = (nivelValor.toUpperCase() === "BAIXO") 
+                    ? "texto-alerta text-4xl font-bold mt-2" 
+                    : "texto-normal text-4xl font-bold mt-2";
+
+                document.getElementById("ultimaAlim").textContent = dados.ultimaAlimentacao ?? "--";
+
+                atualizarBotao("btnIlum", dados.atuadores?.iluminacao ?? false);
+                atualizarBotao("btnR1", dados.atuadores?.rele1 ?? false);
+                atualizarBotao("btnR2", dados.atuadores?.rele2 ?? false);
+                atualizarBotao("btnR3", dados.atuadores?.rele3 ?? false);
+
+                if (dados.configuracoes?.horarioAlimentacao) {
+                    document.getElementById("horarioAlim").value = dados.configuracoes.horarioAlimentacao;
+                }
+            });
+        }
+
+        function atualizarBotao(id, estado) {
+            const btn = document.getElementById(id);
+            btn.textContent = estado ? "Ligado" : "Desligado";
+            btn.className = `px-4 py-1 rounded ${estado ? "bg-green-600" : "bg-gray-600"}`;
+        }
+
+        function alternar(tipo) {
+            db.ref(`dispositivos/${dispositivoAtual}/atuadores/${tipo}`).transaction(v => !v);
+        }
+
+        function acionarAlimentador() {
+            db.ref(`dispositivos/${dispositivoAtual}/atuadores/servo`).set(90);
+            setTimeout(() => db.ref(`dispositivos/${dispositivoAtual}/atuadores/servo`).set(0), 1200);
+        }
+
+        function salvarHorario() {
+            const horario = document.getElementById("horarioAlim").value;
+            if (!horario) return alert("Selecione um horário");
+            db.ref(`dispositivos/${dispositivoAtual}/configuracoes/horarioAlimentacao`).set(horario);
+            alert("✅ Horário salvo!");
+        }
+
+        function sair() {
+            dispositivoAtual = "";
+            trocarTelaPrincipal(false);
+            mostrarLogin();
+        }
+    </script>
+</body>
+</html>
