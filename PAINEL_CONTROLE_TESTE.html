@@ -47,7 +47,9 @@
     <div class="container mx-auto px-4 py-6 max-w-7xl">
         <header class="bg-aqua text-white rounded-xl p-6 mb-8 card-shadow">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <!-- Versão no canto esquerdo -->
                 <div class="flex items-center gap-3">
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">V1.0</span>
                     <i class="fa fa-tint text-4xl"></i>
                     <div>
                         <h1 class="text-2xl md:text-3xl font-bold">AquaVibes</h1>
@@ -100,7 +102,7 @@
             <div class="bg-white rounded-xl p-5 card-shadow border-l-4 border-visits">
                 <div class="flex justify-between items-center">
                     <div>
-                        <p class="text-gray-500 text-sm">Visitas Portal</p>
+                        <p class="text-gray-500 text-sm">Total de Visitas</p>
                         <h2 id="totalVisitas" class="text-3xl font-bold text-visits mt-1">0</h2>
                     </div>
                     <i class="fa fa-eye text-4xl text-visits/20"></i>
@@ -172,7 +174,6 @@
                 const ultimaAtualizacao = Number(dados?.status?.ultimaAtualizacao) || 0;
                 const dataCadastro = Number(dados?.dataCadastro) || 0;
 
-                // ✅ Cálculo correto e seguro
                 const estaOnline = ultimaAtualizacao > 0 && (agora - ultimaAtualizacao) < LIMITE_ONLINE;
                 totalCadastrados++;
                 if (estaOnline) totalOnline++;
@@ -215,12 +216,10 @@
         }
 
         function iniciarMonitoramento() {
-            // Monitora lista de dispositivos
             db.ref("dispositivos").on("value", snapshot => {
                 snapshotAtual = snapshot;
                 processarDados();
             });
-            // Monitora contador de visitas em tempo real
             db.ref("estatisticas/visitas").on("value", snapshot => {
                 totalVisitas = snapshot.val() || 0;
                 processarDados();
