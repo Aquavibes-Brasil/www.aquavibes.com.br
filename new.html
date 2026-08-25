@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aquavibes | Bem-vindo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <style>
+        .texto-normal {
+            color: #3b82f6; /* Azul */
+        }
+        .texto-alerta {
+            color: #ef4444; /* Vermelho */
+            animation: piscarRapido 0.5s infinite;
+            font-weight: bold;
+        }
+        @keyframes piscarRapido {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-gray-100 font-sans">
+    <!-- Menu de Navegação Superior -->
+    <nav class="fixed top-0 left-0 w-full p-4 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-700">
+        <ul class="flex justify-center items-center gap-6 md:gap-10 flex-wrap list-none">
+            <li><a href="index.html" class="text-cyan-400 hover:text-white transition-colors font-medium">Home</a></li>
+            <li><a href="#suporte" class="text-gray-300 hover:text-white transition-colors">Suporte</a></li>
+            <li><a href="#revendedor" class="text-gray-300 hover:text-white transition-colors">Revendedor</a></li>
+            <li><a href="#informacoes" class="text-gray-300 hover:text-white transition-colors">Informações</a></li>
+            <li><a href="#contatos" class="text-gray-300 hover:text-white transition-colors">Contatos</a></li>
+        </ul>
+    </nav>
+    <!-- Conteúdo Principal -->
+    <main class="min-h-screen flex flex-col items-center justify-center px-4 pt-24 pb-12">
+        <div class="w-full max-w-md bg-slate-800 p-8 rounded-2xl shadow-xl text-center">
+            <!-- Logo -->
+            <div class="mb-8 relative">
+                <div class="inline-block relative">
+                    <img src="aquavibes-logo.png" alt="Aquavibes" class="w-56 md:w-64 h-auto rounded-xl shadow-lg">
+                    <div class="absolute inset-0 rounded-xl bg-cyan-500/10 blur-xl -z-10 scale-110"></div>
+                </div>
+            </div>
+            <!-- Título e Slogan -->
+           <!-- <h1 class="text-4xl md:text-5xl font-bold texto-normal tracking-widest mb-3">AQUAVIBES</h1> -->
+            
+            <p class="text-cyan-300 text-base md:text-lg tracking-wider uppercase mb-8">Onde a tecnologia se une à natureza</p>
+            <!-- Acesso Rápido -->
+            <a href="PAINEL_CLIENTES.html" class="inline-block w-full p-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-semibold transition mb-6">
+                <i class="fa fa-sign-in mr-2"></i> Acessar Sistema
+            </a>
+        </div>
+        <!-- Seções de Conteúdo -->
+        <section id="suporte" class="w-full max-w-md mt-8 bg-slate-800 p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold text-cyan-300 mb-4"><i class="fa fa-life-ring mr-2"></i> Suporte</h2>
+            <p class="text-gray-300">Precisa de ajuda? Entre em contato conosco para suporte técnico, dúvidas sobre o sistema ou assistência com seu dispositivo.</p>
+        </section>
+        <section id="revendedor" class="w-full max-w-md mt-6 bg-slate-800 p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold text-cyan-300 mb-4"><i class="fa fa-handshake-o mr-2"></i> Seja um Revendedor</h2>
+            <p class="text-gray-300">VENDAS - POSEIDON COMERCIAL (21) 99106-1001</p>
+            <p class="text-gray-300">Email: poseidon.comercial2024@gmail.com</p>
+            <p class="text-gray-300">Interessado em ser um revendedor? Entre em contato para conhecer nossas condições exclusivas e parcerias.</p>
+        </section>
+        <section id="informacoes" class="w-full max-w-md mt-6 bg-slate-800 p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold text-cyan-300 mb-4"><i class="fa fa-info-circle mr-2"></i> Informações</h2>
+            <p class="text-gray-300">O sistema AquaVibes oferece monitoramento inteligente de qualidade da água, controle automático e alertas em tempo real para seu aquário ou reservatório.</p>
+        </section>
+        <section id="contatos" class="w-full max-w-md mt-6 bg-slate-800 p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold text-cyan-300 mb-4"><i class="fa fa-envelope mr-2"></i> Contatos</h2>
+            <div class="text-gray-300 space-y-2">
+                <p><i class="fa fa-envelope-o mr-2 text-cyan-400"></i> VENDAS poseidon.comercial2024@gmail.com</p>
+                <p><i class="fa fa-whatsapp mr-2 text-green-400"></i> VENDAS (21) 99106-1001</p>
+                <p><i class="fa fa-envelope-o mr-2 text-cyan-400"></i> SUPORTE aquavibesbrasil@gmail.com</p>
+                <p><i class="fa fa-whatsapp mr-2 text-green-400"></i> SUPORTE (21) 99839-8394</p>
+            </div>
+        </section>
+    </main>
+    <!-- Rodapé com Contador de Visitas -->
+    <footer class="text-center py-4 text-gray-500 text-sm space-y-1">
+        <p>© 2026 AquaVibes — Eng. P.Chacao - Todos os direitos reservados</p>
+        <p class="text-cyan-400 text-xs">
+            <i class="fa fa-eye mr-1"></i> Total de visitas: <span id="contadorVisitas" class="font-semibold">carregando...</span>
+        </p>
+    </footer>
+
+    <script>
+        // ========== CONFIGURAÇÃO DO FIREBASE ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyDV6RsVkCORj9krfMKwHxvAcZ1KuLE63Uk",
+            authDomain: "aquavibes-4c90b.firebaseapp.com",
+            databaseURL: "https://aquavibes-4c90b-default-rtdb.firebaseio.com/",
+            projectId: "aquavibes-4c90b",
+            storageBucket: "aquavibes-4c90b.firebasestorage.app",
+            messagingSenderId: "135879785949",
+            appId: "1:135879785949:web:9ad421be35289e02754a34"
+        };
+
+        // Inicializa Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ========== CONTADOR DE VISITAS ==========
+        const UMA_HORA = 60 * 60 * 1000; // 1 hora em milissegundos
+        const CHAVE_ULTIMA_VISITA = 'ultimaVisitaAquaVibes';
+        const REF_CONTADOR = db.ref('estatisticas/visitas');
+
+        // Verifica se pode contar esta visita (uma vez por hora)
+        function podeContarVisita() {
+            const ultimaVisita = localStorage.getItem(CHAVE_ULTIMA_VISITA);
+            if (!ultimaVisita) return true;
+            const agora = Date.now();
+            const tempoDecorrido = agora - parseInt(ultimaVisita, 10);
+            return tempoDecorrido > UMA_HORA;
+        }
+
+        function registrarVisita() {
+            localStorage.setItem(CHAVE_ULTIMA_VISITA, Date.now().toString());
+        }
+
+        // Atualiza contador no Firebase
+        async function atualizarContador() {
+            try {
+                if (podeContarVisita()) {
+                    await REF_CONTADOR.transaction(contagemAtual => {
+                        return (contagemAtual || 0) + 1;
+                    });
+                    registrarVisita();
+                }
+            } catch (erro) {
+                console.error('Erro ao atualizar contador:', erro);
+            }
+        }
+
+        // Escuta alterações e exibe o número em tempo real
+        function exibirContador() {
+            REF_CONTADOR.on('value', (snapshot) => {
+                const total = snapshot.val() || 0;
+                document.getElementById('contadorVisitas').textContent = total.toLocaleString('pt-BR');
+            }, (erro) => {
+                document.getElementById('contadorVisitas').textContent = '--';
+                console.error('Erro ao ler contador:', erro);
+            });
+        }
+
+        // Inicia tudo quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            exibirContador();   // Mostra o número atual
+            atualizarContador(); // Conta a visita se passou 1 hora
+        });
+    </script>
+</body>
+</html>
