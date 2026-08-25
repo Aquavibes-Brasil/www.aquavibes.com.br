@@ -23,7 +23,6 @@
             animation: piscarRapido 0.5s infinite; /* Piscada rápida */
             font-weight: bold;
         }
-
         /* ===== ESTILOS RESPONSIVOS DOS MEDIDORES ===== */
         .medidor {
             position: relative;
@@ -64,7 +63,6 @@
             opacity: 0.8;
             margin-top: 3px;
         }
-
         /* Ajuste para telas maiores: tamanho original */
         @media (min-width: 768px) {
             .medidor {
@@ -81,7 +79,6 @@
                 font-size: 0.9rem;
             }
         }
-
         /* Legenda das faixas */
         .legenda-faixa {
             margin-top: 10px;
@@ -94,7 +91,6 @@
             color: #22c55e;
             font-weight: 500;
         }
-
         /* Estilos para os horários de alimentação */
         .item-horario {
             display: flex;
@@ -116,7 +112,6 @@
     </style>
 </head>
 <body class="bg-slate-900 text-gray-100 font-sans">
-
     <!-- Tela de Acesso -->
     <div id="telaAcesso" class="min-h-screen flex items-center justify-center px-4">
         <div class="w-full max-w-md bg-slate-800 p-8 rounded-2xl shadow-xl">
@@ -126,15 +121,15 @@
                 <p class="texto-normal">Sistema de Monitoramento</p>
                 
             </div>
-
             <div id="formLogin" class="space-y-4">
                 <input type="text" id="usuario" placeholder="Usuário" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
                 <input type="password" id="senha" placeholder="Senha" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
                 <button onclick="entrar()" class="w-full p-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-semibold transition">Entrar</button>
+                <!-- BOTÃO VOLTAR ADICIONADO AQUI -->
+                <a href="index.html" class="block w-full p-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold transition text-center">Voltar</a>
                 <p id="msgAcesso" class="text-center mt-2 text-sm"></p>
                 <p class="text-center texto-normal mt-4">Primeiro acesso? <a href="#" onclick="mostrarCadastro()" class="text-cyan-400">Cadastrar</a></p>
             </div>
-
             <div id="formCadastro" class="space-y-4 hidden">
                 <h3 class="text-xl text-center text-cyan-300 mb-2">Cadastro de Acesso</h3>
                 <input type="text" id="novoUsuario" placeholder="Escolha seu usuário" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
@@ -147,14 +142,12 @@
                         <i class="fa fa-qrcode"></i>
                     </button>
                 </div>
-
                 <button onclick="cadastrar()" class="w-full p-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition">Salvar Cadastro</button>
                 <p id="msgCadastro" class="text-center mt-2 text-sm"></p>
                 <p class="text-center texto-normal mt-4">Já tem cadastro? <a href="#" onclick="mostrarLogin()" class="text-cyan-400">Fazer login</a></p>
             </div>
         </div>
     </div>
-
     <!-- Modal Leitor QR -->
     <div id="modalLeitorQR" class="fixed inset-0 bg-black/90 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-slate-800 p-6 rounded-xl w-full max-w-md">
@@ -168,7 +161,6 @@
             <p class="text-center text-sm texto-normal mt-3">Aponte a câmera para o código QR do dispositivo</p>
         </div>
     </div>
-
     <!-- Tela Principal -->
     <div id="telaPrincipal" class="hidden p-4 md:p-6 max-w-7xl mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8">
@@ -182,7 +174,6 @@
                 <button onclick="sair()" class="px-3 py-1.5 md:px-4 md:py-2 bg-red-600 hover:bg-red-700 rounded-lg text-xs md:text-sm">Sair</button>
             </div>
         </header>
-
         <!-- Cards de Sensores com Medidores e Legendas -->
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
             <!-- Temperatura -->
@@ -203,7 +194,6 @@
                     Ideal: <span class="legenda-ideal">22 a 28 °C</span>
                 </div>
             </div>
-
             <!-- pH da Água -->
             <div class="bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg border-l-4 border-green-500 flex flex-col items-center">
                 <h3 class="texto-normal mb-3 md:mb-4 text-sm md:text-base">pH da Água</h3>
@@ -222,7 +212,6 @@
                     Ideal: <span class="legenda-ideal">6,5 a 8,0</span>
                 </div>
             </div>
-
             <!-- Turbidez -->
             <div class="bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg border-l-4 border-amber-500 flex flex-col items-center">
                 <h3 class="texto-normal mb-3 md:mb-4 text-sm md:text-base">Turbidez</h3>
@@ -241,7 +230,6 @@
                     Ideal: <span class="legenda-ideal">até 5 NTU</span>
                 </div>
             </div>
-
             <!-- Nível de Água -->
             <div class="bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg border-l-4 border-blue-500 flex flex-col items-center">
                 <h3 class="texto-normal mb-3 md:mb-4 text-sm md:text-base">Nível de Água</h3>
@@ -261,7 +249,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Controles e Programação -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             <div class="bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg">
@@ -289,7 +276,6 @@
                     <p class="text-xs md:text-sm texto-normal mt-2">Última alimentação: <span id="ultimaAlim">--</span></p>
                 </div>
             </div>
-
             <div class="bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg">
                 <h3 class="text-lg md:text-xl font-semibold mb-3 md:mb-4 text-cyan-300">Programação de Alimentação</h3>
                 <div class="space-y-3 md:space-y-4">
@@ -299,21 +285,17 @@
                     <div id="listaHorarios" class="space-y-2 mb-3">
                         <!-- Os horários serão inseridos aqui dinamicamente -->
                     </div>
-
                     <button onclick="adicionarHorario()" id="btnAdicionar" class="w-full p-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs md:text-sm font-medium">
                         <i class="fa fa-plus mr-1"></i> Adicionar Horário
                     </button>
-
                     <button onclick="salvarTodosHorarios()" class="w-full p-2.5 md:p-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold mt-3 text-sm md:text-base">
                         Salvar Todos os Horários
                     </button>
-
                     <p class="text-xs md:text-sm texto-normal mt-2">Os horários são verificados automaticamente todos os dias.</p>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- Modal Alterar Senha -->
     <div id="modalSenha" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-slate-800 p-5 md:p-6 rounded-xl w-full max-w-sm">
@@ -328,7 +310,6 @@
             <p id="msgSenha" class="text-center mt-3 text-xs md:text-sm"></p>
         </div>
     </div>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDV6RsVkCORj9krfMKwHxvAcZ1KuLE63Uk",
@@ -339,34 +320,28 @@
             messagingSenderId: "135879785949",
             appId: "1:135879785949:web:9ad421be35289e02754a34"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         let dispositivoAtual = "";
         let leitorQR = null;
         let intervaloStatus = null;
         let horariosCadastrados = [];
-
         // Limites seguros dos sensores
         const LIMITE_TEMP_MIN = 22;
         const LIMITE_TEMP_MAX = 28;
         const LIMITE_PH_MIN = 6.5;
         const LIMITE_PH_MAX = 8.0;
         const LIMITE_TURBIDEZ_MAX = 5; // Acima de 5 NTU = alerta
-
         // Configuração padrão dos medidores
         const COMPRIMENTO_CIRCULO = 2 * Math.PI * 40; // Circunferência total = 2πr
-
         // ========== FUNÇÕES DE GERENCIAMENTO DOS HORÁRIOS ==========
         function adicionarHorario(valor = "") {
             const lista = document.getElementById("listaHorarios");
             const totalItens = lista.children.length;
-
             if (totalItens >= 5) {
                 alert("Você já cadastrou o máximo de 5 horários!");
                 return;
             }
-
             const novoItem = document.createElement("div");
             novoItem.className = "item-horario";
             novoItem.innerHTML = `
@@ -375,28 +350,22 @@
             `;
             lista.appendChild(novoItem);
         }
-
         function removerHorario(elemento) {
             elemento.parentElement.remove();
         }
-
         function salvarTodosHorarios() {
             const inputs = document.querySelectorAll(".input-horario");
             const horarios = [];
-
             inputs.forEach(input => {
                 const valor = input.value.trim();
                 if (valor) horarios.push(valor);
             });
-
             if (horarios.length === 0) {
                 alert("Adicione pelo menos um horário válido!");
                 return;
             }
-
             // Ordena os horários para facilitar a leitura
             horarios.sort();
-
             // Salva no Firebase
             db.ref(`dispositivos/${dispositivoAtual}/configuracoes/horariosAlimentacao`).set(horarios)
                 .then(() => {
@@ -405,18 +374,14 @@
                 })
                 .catch(() => alert("❌ Erro ao salvar os horários!"));
         }
-
         function carregarHorariosSalvos(horarios) {
             if (!horarios || !Array.isArray(horarios)) return;
-
             const lista = document.getElementById("listaHorarios");
             lista.innerHTML = ""; // Limpa antes de carregar
-
             horarios.forEach(horario => {
                 adicionarHorario(horario);
             });
         }
-
         // ========== FUNÇÕES DE ATUALIZAÇÃO DOS MEDIDORES ==========
         // Temperatura
         function atualizarMedidorTemp(valor) {
@@ -424,7 +389,6 @@
             const texto = document.getElementById("valorTemp");
             const min = 15;
             const max = 35;
-
             if (valor === undefined || valor === null) {
                 texto.textContent = "--";
                 barra.style.strokeDashoffset = COMPRIMENTO_CIRCULO;
@@ -432,27 +396,22 @@
                 texto.className = "medidor-valor texto-normal";
                 return;
             }
-
             const valorAjustado = Math.max(min, Math.min(max, valor));
             const porcentagem = (valorAjustado - min) / (max - min);
             const offset = COMPRIMENTO_CIRCULO * (1 - porcentagem);
-
             const foraFaixa = (valor < LIMITE_TEMP_MIN || valor > LIMITE_TEMP_MAX);
             const cor = foraFaixa ? "#ef4444" : "#22c55e";
             texto.className = `medidor-valor ${foraFaixa ? "texto-alerta" : "texto-normal"}`;
-
             texto.textContent = valor.toFixed(1);
             barra.style.strokeDashoffset = offset;
             barra.style.stroke = cor;
         }
-
         // pH
         function atualizarMedidorPh(valor) {
             const barra = document.getElementById("barraPh");
             const texto = document.getElementById("valorPh");
             const min = 0;
             const max = 14;
-
             if (valor === undefined || valor === null) {
                 texto.textContent = "--";
                 barra.style.strokeDashoffset = COMPRIMENTO_CIRCULO;
@@ -460,27 +419,22 @@
                 texto.className = "medidor-valor texto-normal";
                 return;
             }
-
             const valorAjustado = Math.max(min, Math.min(max, valor));
             const porcentagem = valorAjustado / max;
             const offset = COMPRIMENTO_CIRCULO * (1 - porcentagem);
-
             const foraFaixa = (valor < LIMITE_PH_MIN || valor > LIMITE_PH_MAX);
             const cor = foraFaixa ? "#ef4444" : "#22c55e";
             texto.className = `medidor-valor ${foraFaixa ? "texto-alerta" : "texto-normal"}`;
-
             texto.textContent = valor.toFixed(2);
             barra.style.strokeDashoffset = offset;
             barra.style.stroke = cor;
         }
-
         // Turbidez
         function atualizarMedidorTurb(valor) {
             const barra = document.getElementById("barraTurb");
             const texto = document.getElementById("valorTurb");
             const min = 0;
             const max = 15;
-
             if (valor === undefined || valor === null) {
                 texto.textContent = "--";
                 barra.style.strokeDashoffset = COMPRIMENTO_CIRCULO;
@@ -488,25 +442,20 @@
                 texto.className = "medidor-valor texto-normal";
                 return;
             }
-
             const valorAjustado = Math.max(min, Math.min(max, valor));
             const porcentagem = valorAjustado / max;
             const offset = COMPRIMENTO_CIRCULO * (1 - porcentagem);
-
             const foraFaixa = (valor > LIMITE_TURBIDEZ_MAX);
             const cor = foraFaixa ? "#ef4444" : "#22c55e";
             texto.className = `medidor-valor ${foraFaixa ? "texto-alerta" : "texto-normal"}`;
-
             texto.textContent = valor.toFixed(0);
             barra.style.strokeDashoffset = offset;
             barra.style.stroke = cor;
         }
-
         // Nível de Água
         function atualizarMedidorNivel(textoNivel) {
             const barra = document.getElementById("barraNivel");
             const texto = document.getElementById("valorNivel");
-
             if (!textoNivel || textoNivel === "--") {
                 texto.textContent = "--";
                 barra.style.strokeDashoffset = COMPRIMENTO_CIRCULO;
@@ -514,7 +463,6 @@
                 texto.className = "medidor-valor texto-normal";
                 return;
             }
-
             let porcentagem, cor, classe;
             switch(textoNivel.toUpperCase()) {
                 case "BAIXO":
@@ -538,27 +486,23 @@
                     cor = "#475569";
                     classe = "texto-normal";
             }
-
             const offset = COMPRIMENTO_CIRCULO * (1 - porcentagem);
             texto.textContent = textoNivel;
             texto.className = `medidor-valor ${classe}`;
             barra.style.strokeDashoffset = offset;
             barra.style.stroke = cor;
         }
-
         // ========== FUNÇÕES ORIGINAIS DO SISTEMA ==========
         function mostrarLogin() {
             document.getElementById("formLogin").classList.remove("hidden");
             document.getElementById("formCadastro").classList.add("hidden");
             limparMensagens();
         }
-
         function mostrarCadastro() {
             document.getElementById("formLogin").classList.add("hidden");
             document.getElementById("formCadastro").classList.remove("hidden");
             limparMensagens();
         }
-
         function trocarTelaPrincipal(mostrar) {
             document.getElementById("telaAcesso").classList.toggle("hidden", mostrar);
             document.getElementById("telaPrincipal").classList.toggle("hidden", !mostrar);
@@ -567,13 +511,11 @@
                 intervaloStatus = null;
             }
         }
-
         function limparMensagens() {
             document.getElementById("msgAcesso").textContent = "";
             document.getElementById("msgCadastro").textContent = "";
             document.getElementById("msgSenha").textContent = "";
         }
-
         function abrirLeitorQR() {
             document.getElementById("modalLeitorQR").classList.remove("hidden");
             leitorQR = new Html5Qrcode("leitorQR");
@@ -590,34 +532,27 @@
                 fecharLeitorQR();
             });
         }
-
         function fecharLeitorQR() {
             if (leitorQR) { leitorQR.stop().catch(() => {}); leitorQR = null; }
             document.getElementById("modalLeitorQR").classList.add("hidden");
         }
-
         async function entrar() {
             const usuario = document.getElementById("usuario").value.trim();
             const senha = document.getElementById("senha").value.trim();
             const msg = document.getElementById("msgAcesso");
             limparMensagens();
-
             if (!usuario || !senha) { msg.textContent = "Preencha todos os campos"; msg.className = "text-red-400"; return; }
-
             const snapshot = await db.ref("dispositivos").orderByChild("credenciais/usuario").equalTo(usuario).once("value");
             if (!snapshot.exists()) { msg.textContent = "Usuário não encontrado"; msg.className = "text-red-400"; return; }
-
             const dados = snapshot.val();
             const id = Object.keys(dados)[0];
             if (dados[id].credenciais.senha !== senha) { msg.textContent = "Senha incorreta"; msg.className = "text-red-400"; return; }
-
             dispositivoAtual = id;
             document.getElementById("idDisp").textContent = id;
             trocarTelaPrincipal(true);
             iniciarMonitoramento();
             iniciarVerificacaoStatus();
         }
-
         async function cadastrar() {
             const usuario = document.getElementById("novoUsuario").value.trim();
             const senha = document.getElementById("novaSenha").value.trim();
@@ -625,63 +560,50 @@
             const idDisp = document.getElementById("idDispositivoCadastro").value.trim();
             const msg = document.getElementById("msgCadastro");
             limparMensagens();
-
             if (!usuario || !senha || !confirma || !idDisp) { msg.textContent = "Preencha todos os campos"; msg.className = "text-red-400"; return; }
             if (senha !== confirma) { msg.textContent = "Senhas não coincidem"; msg.className = "text-red-400"; return; }
-
             const snapshot = await db.ref(`dispositivos/${idDisp}`).once("value");
             if (!snapshot.exists()) { msg.textContent = "Dispositivo não encontrado"; msg.className = "text-red-400"; return; }
-
             const dadosDisp = snapshot.val();
             if (dadosDisp.credenciais.usuario !== "") { msg.textContent = "Dispositivo já cadastrado"; msg.className = "text-red-400"; return; }
-
             await db.ref(`dispositivos/${idDisp}/credenciais`).update({ usuario: usuario, senha: senha });
             msg.textContent = "✅ Cadastro realizado! Faça login.";
             msg.className = "text-green-400";
             setTimeout(mostrarLogin, 2500);
         }
-
         function abrirAlterarSenha() { document.getElementById("modalSenha").classList.remove("hidden"); }
         function fecharModalSenha() { document.getElementById("modalSenha").classList.add("hidden"); limparMensagens(); }
-
         async function salvarNovaSenha() {
             const atual = document.getElementById("senhaAtual").value.trim();
             const nova = document.getElementById("novaSenhaAlt").value.trim();
             const confirma = document.getElementById("confirmaSenhaAlt").value.trim();
             const msg = document.getElementById("msgSenha");
             limparMensagens();
-
             if (!atual || !nova || !confirma) { msg.textContent = "Preencha todos os campos"; msg.className = "text-red-400"; return; }
             if (nova !== confirma) { msg.textContent = "Novas senhas não coincidem"; msg.className = "text-red-400"; return; }
-
             const snapshot = await db.ref(`dispositivos/${dispositivoAtual}/credenciais`).once("value");
             const cred = snapshot.val();
             if (cred.senha !== atual) { msg.textContent = "Senha atual incorreta"; msg.className = "text-red-400"; return; }
-
             await db.ref(`dispositivos/${dispositivoAtual}/credenciais`).update({ senha: nova });
             msg.textContent = "✅ Senha alterada!";
             msg.className = "text-green-400";
             setTimeout(fecharModalSenha, 2000);
         }
-
         function iniciarVerificacaoStatus() {
             verificarStatusDispositivo();
             intervaloStatus = setInterval(verificarStatusDispositivo, 30000);
         }
-
         async function verificarStatusDispositivo() {
             if (!dispositivoAtual) return;
             try {
                 const snapshot = await db.ref(`dispositivos/${dispositivoAtual}/status/ultimaAtualizacao`).once("value");
                 const ultimaAtualizacao = snapshot.val();
                 const elementoStatus = document.getElementById("statusDispositivo");
-
                 if (!ultimaAtualizacao) {
                     elementoStatus.textContent = "Offline";
                     elementoStatus.className = "text-red-500 font-semibold";
                     return;
                 }
-
                 const diferencaMinutos = (Date.now() - ultimaAtualizacao) / 60000;
                 if (diferencaMinutos > 2) {
                     elementoStatus.textContent = "Offline";
@@ -695,41 +617,33 @@
                 document.getElementById("statusDispositivo").className = "text-yellow-500 font-semibold";
             }
         }
-
         function iniciarMonitoramento() {
             const ref = db.ref(`dispositivos/${dispositivoAtual}`);
             ref.on("value", (snap) => {
                 const dados = snap.val();
                 if (!dados) return;
-
                 // Atualiza todos os medidores
                 atualizarMedidorTemp(dados.sensores?.temperatura);
                 atualizarMedidorPh(dados.sensores?.ph);
                 atualizarMedidorTurb(dados.sensores?.turbidez);
                 atualizarMedidorNivel(dados.sensores?.nivelTexto ?? "--");
-
                 document.getElementById("ultimaAlim").textContent = dados.ultimaAlimentacao ?? "--";
-
                 atualizarBotao("btnIlum", dados.atuadores?.iluminacao ?? false);
                 atualizarBotao("btnR1", dados.atuadores?.rele1 ?? false);
                 atualizarBotao("btnR2", dados.atuadores?.rele2 ?? false);
                 atualizarBotao("btnR3", dados.atuadores?.rele3 ?? false);
-
                 // Carrega os horários salvos
                 carregarHorariosSalvos(dados.configuracoes?.horariosAlimentacao);
             });
         }
-
         function atualizarBotao(id, estado) {
             const btn = document.getElementById(id);
             btn.textContent = estado ? "Ligado" : "Desligado";
             btn.className = `px-3 py-1 md:px-4 md:py-1 rounded text-xs md:text-sm ${estado ? "bg-green-600" : "bg-gray-600"}`;
         }
-
         function alternar(tipo) {
             db.ref(`dispositivos/${dispositivoAtual}/atuadores/${tipo}`).transaction(v => !v);
         }
-
         function acionarAlimentador() {
             db.ref(`dispositivos/${dispositivoAtual}/atuadores/servo`).set(90);
             setTimeout(() => db.ref(`dispositivos/${dispositivoAtual}/atuadores/servo`).set(0), 1200);
@@ -737,12 +651,10 @@
             const agora = new Date().toLocaleString("pt-BR");
             db.ref(`dispositivos/${dispositivoAtual}/ultimaAlimentacao`).set(agora);
         }
-
         function sair() {
             dispositivoAtual = "";
             trocarTelaPrincipal(false);
             mostrarLogin();
-            </a>
         }
     </script>
 </body>
