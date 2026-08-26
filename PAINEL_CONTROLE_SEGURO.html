@@ -44,10 +44,14 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800">
+    <!-- Elemento de áudio oculto -->
+    <audio id="somNotificacao" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJN0F/A8f9NIEeQAAA==" type="audio/wav">
+    
+
     <div class="container mx-auto px-4 py-6 max-w-7xl">
         <header class="bg-aqua text-white rounded-xl p-6 mb-8 card-shadow">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <!-- Versão no canto esquerdo -->
                 <div class="flex items-center gap-3">
                     <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">V1.0</span>
                     <i class="fa fa-tint text-4xl"></i>
@@ -62,6 +66,7 @@
                 </div>
             </div>
         </header>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
             <div class="bg-white rounded-xl p-5 card-shadow border-l-4 border-aqua">
                 <div class="flex justify-between items-center">
@@ -109,6 +114,7 @@
                 </div>
             </div>
         </div>
+
         <div class="bg-white rounded-xl p-6 card-shadow">
             <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
                 <i class="fa fa-list text-aqua"></i> Lista de Dispositivos
@@ -130,10 +136,12 @@
                 </table>
             </div>
         </div>
+
         <footer class="mt-8 text-center text-gray-500 text-sm">
             <p>AquaVibes © 2026 | Sistema de Monitoramento</p>
         </footer>
     </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDV6RsVkCORj9krfMKwHxvAcZ1KuLE63Uk",
@@ -146,16 +154,36 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
         // Parâmetros
-        const LIMITE_ONLINE = 30 * 1000;        // 30 segundos
-        const LIMITE_24H = 24 * 60 * 60 * 1000; // 24h
-        const LIMITE_MES = 30 * 24 * 60 * 60 * 1000; // 30 dias
-        const INTERVALO_ATUALIZACAO = 10000;    // Verifica a cada 10s
+        const LIMITE_ONLINE = 30 * 1000;
+        const LIMITE_24H = 24 * 60 * 60 * 1000;
+        const LIMITE_MES = 30 * 24 * 60 * 60 * 1000;
+        const INTERVALO_ATUALIZACAO = 10000;
+        const DURACAO_SINO = 2000; // 2 segundos
+
         let snapshotAtual = null;
         let totalVisitas = 0;
+        let dadosAnteriores = null; // Para detectar mudanças
+
+        const somNotificacao = document.getElementById('somNotificacao');
+
+        function tocarSino() {
+            somNotificacao.currentTime = 0;
+            somNotificacao.play().catch(e => console.log("Áudio bloqueado pelo navegador:", e));
+            setTimeout(() => {
+                somNotificacao.pause();
+                somNotificacao.currentTime = 0;
+            }, DURACAO_SINO);
+        }
 
         function atualizarRelogio() {
             document.getElementById('horaAtualizacao').textContent = new Date().toLocaleTimeString('pt-BR');
+        }
+
+        function dadosMudaram(atual, anterior) {
+            if (!anterior) return true;
+            return JSON.stringify(atual) !== JSON.stringify(anterior);
         }
 
         function processarDados() {
@@ -173,8 +201,8 @@
                 const mac = dados.mac || "Não informado";
                 const ultimaAtualizacao = Number(dados?.status?.ultimaAtualizacao) || 0;
                 const dataCadastro = Number(dados?.dataCadastro) || 0;
-
                 const estaOnline = ultimaAtualizacao > 0 && (agora - ultimaAtualizacao) < LIMITE_ONLINE;
+
                 totalCadastrados++;
                 if (estaOnline) totalOnline++;
                 if (dataCadastro > 0 && (agora - dataCadastro) < LIMITE_24H) adicionados24h++;
@@ -182,6 +210,14 @@
 
                 listaDispositivos.push({ id, mac, estaOnline });
             });
+
+            const dadosAtuais = { totalCadastrados, totalOnline, adicionados24h, adicionadosMes, totalVisitas, listaDispositivos };
+
+            // Toca o sino apenas quando houver mudança real
+            if (dadosMudaram(dadosAtuais, dadosAnteriores)) {
+                tocarSino();
+                dadosAnteriores = dadosAtuais;
+            }
 
             document.getElementById('totalCadastrados').textContent = totalCadastrados;
             document.getElementById('totalOnline').textContent = totalOnline;
@@ -196,6 +232,7 @@
                 tabela.innerHTML = `<tr><td colspan="3" class="p-5 text-center text-gray-500">Nenhum dispositivo cadastrado</td></tr>`;
                 return;
             }
+
             listaDispositivos.sort((a, b) => a.id.localeCompare(b.id));
             listaDispositivos.forEach(disp => {
                 const statusClasse = disp.estaOnline ? "bg-green-100 text-green-700 pulse" : "bg-red-100 text-red-700";
@@ -226,6 +263,7 @@
             });
             setInterval(processarDados, INTERVALO_ATUALIZACAO);
         }
+
         window.onload = iniciarMonitoramento;
     </script>
 </body>
