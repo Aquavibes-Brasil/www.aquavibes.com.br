@@ -44,7 +44,8 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800">
-    <!-- 🎵 Som de sino - ADICIONADO, sem alterar mais nada -->
+
+    <!-- ✅ Elemento de Áudio CORRIGIDO -->
     <audio id="sinoNotificacao" preload="auto">
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIuTQAA" type="audio/wav">
     
@@ -138,6 +139,7 @@
             <p>AquaVibes © 2026 | Sistema de Monitoramento</p>
         </footer>
     </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDV6RsVkCORj9krfMKwHxvAcZ1KuLE63Uk",
@@ -150,31 +152,36 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        // Parâmetros
+
+        // Parâmetros — ORIGINAIS, sem alteração
         const LIMITE_ONLINE = 30 * 1000;
         const LIMITE_24H = 24 * 60 * 60 * 1000;
         const LIMITE_MES = 30 * 24 * 60 * 60 * 1000;
         const INTERVALO_ATUALIZACAO = 10000;
-        const DURACAO_SINO = 2000; // 2 segundos
+        const DURACAO_SINO = 2000;
 
         let snapshotAtual = null;
         let totalVisitas = 0;
-        let hashAnterior = ""; // Para detectar mudanças
+        let hashAnterior = "";
 
-        // 🎵 Função do sino - ADICIONADA
-        const sino = document.getElementById('sinoNotificacao');
+        // ✅ Áudio carregado de forma segura
+        let somSino = null;
         function tocarSino() {
-            sino.currentTime = 0;
-            sino.play().catch(e => console.log("Som bloqueado:", e));
-            setTimeout(() => {
-                sino.pause();
-                sino.currentTime = 0;
+            if (!somSino) somSino = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIuTQAA");
+            somSino.currentTime = 0;
+            somSino.play().catch(function(e) {
+                console.log("Som bloqueado pelo navegador (clique na página primeiro):", e.message);
+            });
+            setTimeout(function() {
+                somSino.pause();
+                somSino.currentTime = 0;
             }, DURACAO_SINO);
         }
 
         function atualizarRelogio() {
             document.getElementById('horaAtualizacao').textContent = new Date().toLocaleTimeString('pt-BR');
         }
+
         function processarDados() {
             if (!snapshotAtual) return;
             const agora = Date.now();
@@ -183,68 +190,66 @@
             let adicionados24h = 0;
             let adicionadosMes = 0;
             const listaDispositivos = [];
-            snapshotAtual.forEach(dispositivo => {
+
+            snapshotAtual.forEach(function(dispositivo) {
                 const dados = dispositivo.val();
                 const id = dispositivo.key;
                 const mac = dados.mac || "Não informado";
                 const ultimaAtualizacao = Number(dados?.status?.ultimaAtualizacao) || 0;
                 const dataCadastro = Number(dados?.dataCadastro) || 0;
                 const estaOnline = ultimaAtualizacao > 0 && (agora - ultimaAtualizacao) < LIMITE_ONLINE;
+
                 totalCadastrados++;
                 if (estaOnline) totalOnline++;
                 if (dataCadastro > 0 && (agora - dataCadastro) < LIMITE_24H) adicionados24h++;
                 if (dataCadastro > 0 && (agora - dataCadastro) < LIMITE_MES) adicionadosMes++;
-                listaDispositivos.push({ id, mac, estaOnline });
+                listaDispositivos.push({ id: id, mac: mac, estaOnline: estaOnline });
             });
 
-            // 🎵 Verifica mudanças e toca sino
-            const hashAtual = JSON.stringify({ totalCadastrados, totalOnline, adicionados24h, adicionadosMes, totalVisitas, listaDispositivos });
+            // ✅ Verifica mudança e toca sino
+            const hashAtual = JSON.stringify({ t: totalCadastrados, o: totalOnline, d24: adicionados24h, dm: adicionadosMes, v: totalVisitas, l: listaDispositivos });
             if (hashAtual !== hashAnterior) {
                 tocarSino();
                 hashAnterior = hashAtual;
             }
 
+            // ✅ Atualizações visuais — ORIGINAIS
             document.getElementById('totalCadastrados').textContent = totalCadastrados;
             document.getElementById('totalOnline').textContent = totalOnline;
             document.getElementById('adicionados24h').textContent = adicionados24h;
             document.getElementById('adicionadosMes').textContent = adicionadosMes;
             document.getElementById('totalVisitas').textContent = totalVisitas.toLocaleString('pt-BR');
             atualizarRelogio();
+
             const tabela = document.getElementById('tabelaDispositivos');
             tabela.innerHTML = "";
             if (listaDispositivos.length === 0) {
-                tabela.innerHTML = `<tr><td colspan="3" class="p-5 text-center text-gray-500">Nenhum dispositivo cadastrado</td></tr>`;
+                tabela.innerHTML = '<tr><td colspan="3" class="p-5 text-center text-gray-500">Nenhum dispositivo cadastrado</td></tr>';
                 return;
             }
-            listaDispositivos.sort((a, b) => a.id.localeCompare(b.id));
-            listaDispositivos.forEach(disp => {
+            listaDispositivos.sort(function(a, b) { return a.id.localeCompare(b.id); });
+            listaDispositivos.forEach(function(disp) {
                 const statusClasse = disp.estaOnline ? "bg-green-100 text-green-700 pulse" : "bg-red-100 text-red-700";
                 const statusTexto = disp.estaOnline ? "Online" : "Offline";
                 const linha = document.createElement("tr");
                 linha.className = "hover:bg-gray-50 transition";
-                linha.innerHTML = `
-                    <td class="p-3 font-mono text-gray-700">${disp.id}</td>
-                    <td class="p-3 font-mono text-gray-600">${disp.mac}</td>
-                    <td class="p-3">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium ${statusClasse}">
-                            ${statusTexto}
-                        </span>
-                    </td>
-                `;
+                linha.innerHTML = '<td class="p-3 font-mono text-gray-700">' + disp.id + '</td><td class="p-3 font-mono text-gray-600">' + disp.mac + '</td><td class="p-3"><span class="px-3 py-1 rounded-full text-xs font-medium ' + statusClasse + '">' + statusTexto + '</span></td>';
                 tabela.appendChild(linha);
             });
         }
+
         function iniciarMonitoramento() {
-            db.ref("dispositivos").on("value", snapshot => {
+            db.ref("dispositivos").on("value", function(snapshot) {
                 snapshotAtual = snapshot;
                 processarDados();
             });
-            db.ref("estatisticas/visitas").on("value", snapshot => {
+            db.ref("estatisticas/visitas").on("value", function(snapshot) {
                 totalVisitas = snapshot.val() || 0;
                 processarDados();
             });
             setInterval(processarDados, INTERVALO_ATUALIZACAO);
         }
+
         window.onload = iniciarMonitoramento;
     </script>
 </body>
