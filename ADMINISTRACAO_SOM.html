@@ -44,7 +44,8 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800">
-    <!-- Áudio de Alerta (embutido) -->
+
+    <!-- Áudio de Alerta CORRIGIDO -->
     <audio id="somAlerta" preload="auto">
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJN0NEAxQp+PwtM0FAdRDt+D0zQUCq7K/c9TUFAtEHx+PwNQn1iv9P29DUEBUaqD+v4NQcF1x9/3RUEBrJOD+7sFQQBZ3ev+twgEAjBzqP/0KAAAhpGP9+hAAADhVn/6sAAAFaV/3qAAAMN5f9/gAAAw==" type="audio/wav">
     
@@ -66,6 +67,7 @@
                 </div>
             </div>
         </header>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
             <div class="bg-white rounded-xl p-5 card-shadow border-l-4 border-aqua">
                 <div class="flex justify-between items-center">
@@ -113,6 +115,7 @@
                 </div>
             </div>
         </div>
+
         <div class="bg-white rounded-xl p-6 card-shadow">
             <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
                 <i class="fa fa-list text-aqua"></i> Lista de Dispositivos
@@ -134,6 +137,7 @@
                 </table>
             </div>
         </div>
+
         <footer class="mt-8 text-center text-gray-500 text-sm">
             <p>AquaVibes © 2026 | Sistema de Monitoramento</p>
         </footer>
@@ -161,7 +165,7 @@
         let snapshotAtual = null;
         let totalVisitas = 0;
 
-        // Variáveis para controle de alterações
+        // Controle de valores anteriores para detecção de alteração
         let valorAnterior_Online = null;
         let valorAnterior_Visitas = null;
         let primeiraCarga_Online = true;
@@ -173,7 +177,7 @@
             try {
                 somAlerta.currentTime = 0;
                 somAlerta.play().catch(e => {
-                    console.log("Som bloqueado pelo navegador (clique na página primeiro):", e);
+                    console.log("Som bloqueado — clique na página primeiro:", e);
                 });
             } catch (e) {
                 console.log("Erro ao tocar som:", e);
@@ -209,7 +213,7 @@
                 listaDispositivos.push({ id, mac, estaOnline });
             });
 
-            // 🔔 Verifica ALTERAÇÃO em Dispositivos Online
+            // 🔔 Toca som APENAS se o número de Online MUDOU
             if (!primeiraCarga_Online && valorAnterior_Online !== totalOnline) {
                 tocarAlerta();
             }
@@ -258,7 +262,7 @@
             db.ref("estatisticas/visitas").on("value", snapshot => {
                 const novoValor = snapshot.val() || 0;
 
-                // 🔔 Verifica ALTERAÇÃO em Visitas
+                // 🔔 Toca som APENAS se o número de Visitas MUDOU
                 if (!primeiraCarga_Visitas && valorAnterior_Visitas !== novoValor) {
                     tocarAlerta();
                 }
