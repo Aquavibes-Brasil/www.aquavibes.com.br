@@ -44,12 +44,12 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800">
+
     <div class="container mx-auto px-4 py-6 max-w-7xl">
         <header class="bg-aqua text-white rounded-xl p-6 mb-8 card-shadow">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <!-- Versão no canto esquerdo -->
                 <div class="flex items-center gap-3">
-                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">V1.0</span>
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">V1.4</span>
                     <i class="fa fa-tint text-4xl"></i>
                     <div>
                         <h1 class="text-2xl md:text-3xl font-bold">AquaVibes</h1>
@@ -62,6 +62,7 @@
                 </div>
             </div>
         </header>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
             <div class="bg-white rounded-xl p-5 card-shadow border-l-4 border-aqua">
                 <div class="flex justify-between items-center">
@@ -109,6 +110,7 @@
                 </div>
             </div>
         </div>
+
         <div class="bg-white rounded-xl p-6 card-shadow">
             <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
                 <i class="fa fa-list text-aqua"></i> Lista de Dispositivos
@@ -119,7 +121,7 @@
                         <tr class="bg-gray-100 text-left">
                             <th class="p-3 rounded-l-lg">ID do Dispositivo</th>
                             <th class="p-3">Endereço MAC</th>
-                            <th class="p-3">Status</th>
+                            <th class="p-3 rounded-r-lg">Status</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaDispositivos" class="divide-y divide-gray-200">
@@ -130,10 +132,12 @@
                 </table>
             </div>
         </div>
+
         <footer class="mt-8 text-center text-gray-500 text-sm">
             <p>AquaVibes © 2026 | Sistema de Monitoramento</p>
         </footer>
     </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDV6RsVkCORj9krfMKwHxvAcZ1KuLE63Uk",
@@ -146,13 +150,43 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
         // Parâmetros
-        const LIMITE_ONLINE = 30 * 1000;        // 30 segundos
-        const LIMITE_24H = 24 * 60 * 60 * 1000; // 24h
-        const LIMITE_MES = 30 * 24 * 60 * 60 * 1000; // 30 dias
-        const INTERVALO_ATUALIZACAO = 10000;    // Verifica a cada 10s
+        const LIMITE_ONLINE = 30 * 1000;
+        const LIMITE_24H = 24 * 60 * 60 * 1000;
+        const LIMITE_MES = 30 * 24 * 60 * 60 * 1000;
+        const INTERVALO_ATUALIZACAO = 10000;
+
         let snapshotAtual = null;
         let totalVisitas = 0;
+
+        // Controle de valores anteriores
+        let valorAnterior_Online = null;
+        let valorAnterior_Visitas = null;
+        let primeiraCarga_Online = true;
+        let primeiraCarga_Visitas = true;
+
+        // 🔊 Função de som usando Web Audio API (confiável e leve)
+        function tocarAlerta() {
+            try {
+                const contexto = new (window.AudioContext || window.webkitAudioContext)();
+                const oscilador = contexto.createOscillator();
+                const ganho = contexto.createGain();
+                
+                oscilador.connect(ganho);
+                ganho.connect(contexto.destination);
+                
+                oscilador.type = 'sine';
+                oscilador.frequency.value = 880;
+                ganho.gain.setValueAtTime(0.3, contexto.currentTime);
+                ganho.gain.exponentialRampToValueAtTime(0.01, contexto.currentTime + 0.3);
+                
+                oscilador.start(contexto.currentTime);
+                oscilador.stop(contexto.currentTime + 0.3);
+            } catch (e) {
+                console.log("Som indisponível:", e);
+            }
+        }
 
         function atualizarRelogio() {
             document.getElementById('horaAtualizacao').textContent = new Date().toLocaleTimeString('pt-BR');
@@ -173,8 +207,8 @@
                 const mac = dados.mac || "Não informado";
                 const ultimaAtualizacao = Number(dados?.status?.ultimaAtualizacao) || 0;
                 const dataCadastro = Number(dados?.dataCadastro) || 0;
-
                 const estaOnline = ultimaAtualizacao > 0 && (agora - ultimaAtualizacao) < LIMITE_ONLINE;
+
                 totalCadastrados++;
                 if (estaOnline) totalOnline++;
                 if (dataCadastro > 0 && (agora - dataCadastro) < LIMITE_24H) adicionados24h++;
@@ -182,6 +216,13 @@
 
                 listaDispositivos.push({ id, mac, estaOnline });
             });
+
+            // 🔔 Toca som quando número de Online muda
+            if (!primeiraCarga_Online && valorAnterior_Online !== totalOnline) {
+                tocarAlerta();
+            }
+            valorAnterior_Online = totalOnline;
+            primeiraCarga_Online = false;
 
             document.getElementById('totalCadastrados').textContent = totalCadastrados;
             document.getElementById('totalOnline').textContent = totalOnline;
@@ -196,6 +237,7 @@
                 tabela.innerHTML = `<tr><td colspan="3" class="p-5 text-center text-gray-500">Nenhum dispositivo cadastrado</td></tr>`;
                 return;
             }
+
             listaDispositivos.sort((a, b) => a.id.localeCompare(b.id));
             listaDispositivos.forEach(disp => {
                 const statusClasse = disp.estaOnline ? "bg-green-100 text-green-700 pulse" : "bg-red-100 text-red-700";
@@ -220,10 +262,21 @@
                 snapshotAtual = snapshot;
                 processarDados();
             });
+
             db.ref("estatisticas/visitas").on("value", snapshot => {
-                totalVisitas = snapshot.val() || 0;
+                const novoValor = snapshot.val() || 0;
+
+                // 🔔 Toca som quando número de Visitas muda
+                if (!primeiraCarga_Visitas && valorAnterior_Visitas !== novoValor) {
+                    tocarAlerta();
+                }
+                valorAnterior_Visitas = novoValor;
+                totalVisitas = novoValor;
+                primeiraCarga_Visitas = false;
+
                 processarDados();
             });
+
             setInterval(processarDados, INTERVALO_ATUALIZACAO);
         }
         window.onload = iniciarMonitoramento;
