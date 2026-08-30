@@ -45,11 +45,6 @@
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800">
 
-    <!-- Áudio de Alerta CORRIGIDO -->
-    <audio id="somAlerta" preload="auto">
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJN0NEAxQp+PwtM0FAdRDt+D0zQUCq7K/c9TUFAtEHx+PwNQn1iv9P29DUEBUaqD+v4NQcF1x9/3RUEBrJOD+7sFQQBZ3ev+twgEAjBzqP/0KAAAhpGP9+hAAADhVn/6sAAAFaV/3qAAAMN5f9/gAAAw==" type="audio/wav">
-    
-
     <div class="container mx-auto px-4 py-6 max-w-7xl">
         <header class="bg-aqua text-white rounded-xl p-6 mb-8 card-shadow">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -165,22 +160,31 @@
         let snapshotAtual = null;
         let totalVisitas = 0;
 
-        // Controle de valores anteriores para detecção de alteração
+        // Controle de valores anteriores
         let valorAnterior_Online = null;
         let valorAnterior_Visitas = null;
         let primeiraCarga_Online = true;
         let primeiraCarga_Visitas = true;
 
-        const somAlerta = document.getElementById('somAlerta');
-
+        // 🔊 Função de som usando Web Audio API (confiável e leve)
         function tocarAlerta() {
             try {
-                somAlerta.currentTime = 0;
-                somAlerta.play().catch(e => {
-                    console.log("Som bloqueado — clique na página primeiro:", e);
-                });
+                const contexto = new (window.AudioContext || window.webkitAudioContext)();
+                const oscilador = contexto.createOscillator();
+                const ganho = contexto.createGain();
+                
+                oscilador.connect(ganho);
+                ganho.connect(contexto.destination);
+                
+                oscilador.type = 'sine';
+                oscilador.frequency.value = 880;
+                ganho.gain.setValueAtTime(0.3, contexto.currentTime);
+                ganho.gain.exponentialRampToValueAtTime(0.01, contexto.currentTime + 0.3);
+                
+                oscilador.start(contexto.currentTime);
+                oscilador.stop(contexto.currentTime + 0.3);
             } catch (e) {
-                console.log("Erro ao tocar som:", e);
+                console.log("Som indisponível:", e);
             }
         }
 
@@ -213,7 +217,7 @@
                 listaDispositivos.push({ id, mac, estaOnline });
             });
 
-            // 🔔 Toca som APENAS se o número de Online MUDOU
+            // 🔔 Toca som quando número de Online muda
             if (!primeiraCarga_Online && valorAnterior_Online !== totalOnline) {
                 tocarAlerta();
             }
@@ -262,7 +266,7 @@
             db.ref("estatisticas/visitas").on("value", snapshot => {
                 const novoValor = snapshot.val() || 0;
 
-                // 🔔 Toca som APENAS se o número de Visitas MUDOU
+                // 🔔 Toca som quando número de Visitas muda
                 if (!primeiraCarga_Visitas && valorAnterior_Visitas !== novoValor) {
                     tocarAlerta();
                 }
