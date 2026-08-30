@@ -151,18 +151,18 @@
         const INTERVALO_ATUALIZACAO = 10000;
         let snapshotAtual = null;
         let totalVisitas = 0;
-        let dadosAnteriores = "";
+        let visitasAnteriores = null; // Guarda valor anterior de visitas
 
-        // 🔔 Som de notificação confiável — embutido no código
-        let somSino = null;
-        function tocarSino() {
+        // 🔔 Som de aviso
+        let somAviso = null;
+        function TocarSomAviso() {
             try {
-                if (!somSino) {
-                    somSino = new Audio("data:audio/wav;base64,UklGRigBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ4BAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIuTQAAAA==");
+                if (!somAviso) {
+                    somAviso = new Audio("data:audio/wav;base64,UklGRigBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ4BAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIuTQAAAA==");
                 }
-                somSino.currentTime = 0;
-                somSino.volume = 0.8;
-                somSino.play().catch(function(){});
+                somAviso.currentTime = 0;
+                somAviso.volume = 0.8;
+                somAviso.play().catch(function(){});
             } catch(e) {}
         }
 
@@ -191,18 +191,19 @@
                 listaDispositivos.push({ id, mac, estaOnline });
             });
 
-            const dadosAtuais = JSON.stringify({totalCadastrados,totalOnline,adicionados24h,adicionadosMes,totalVisitas,listaDispositivos});
-            if (dadosAtuais !== dadosAnteriores) {
-                tocarSino();
-                dadosAnteriores = dadosAtuais;
-            }
-
             document.getElementById('totalCadastrados').textContent = totalCadastrados;
             document.getElementById('totalOnline').textContent = totalOnline;
             document.getElementById('adicionados24h').textContent = adicionados24h;
             document.getElementById('adicionadosMes').textContent = adicionadosMes;
             document.getElementById('totalVisitas').textContent = totalVisitas.toLocaleString('pt-BR');
             atualizarRelogio();
+
+            // 🔔 SOMENTE aqui verifica mudança de visitas
+            if (visitasAnteriores !== null && totalVisitas !== visitasAnteriores) {
+                TocarSomAviso();
+            }
+            visitasAnteriores = totalVisitas;
+
             const tabela = document.getElementById('tabelaDispositivos');
             tabela.innerHTML = "";
             if (listaDispositivos.length === 0) {
