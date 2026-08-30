@@ -145,15 +145,18 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        // ⏱️ Parâmetros — Tempo de verificação alterado para 1 minuto
         const LIMITE_ONLINE = 30 * 1000;
         const LIMITE_24H = 24 * 60 * 60 * 1000;
         const LIMITE_MES = 30 * 24 * 60 * 60 * 1000;
-        const INTERVALO_ATUALIZACAO = 10000;
+        const INTERVALO_ATUALIZACAO = 60 * 1000; // ✅ 1 minuto = 60.000 milissegundos
+
         let snapshotAtual = null;
         let totalVisitas = 0;
-        let visitasAnteriores = null; // Guarda valor anterior de visitas
+        let visitasAnteriores = null;
 
-        // 🔔 Som de aviso
+        // 🔔 Som de aviso — toca SOMENTE quando visitas mudam
         let somAviso = null;
         function TocarSomAviso() {
             try {
@@ -191,18 +194,18 @@
                 listaDispositivos.push({ id, mac, estaOnline });
             });
 
+            // 🔔 Verifica mudança no número de visitas
+            if (visitasAnteriores !== null && totalVisitas !== visitasAnteriores) {
+                TocarSomAviso();
+            }
+            visitasAnteriores = totalVisitas;
+
             document.getElementById('totalCadastrados').textContent = totalCadastrados;
             document.getElementById('totalOnline').textContent = totalOnline;
             document.getElementById('adicionados24h').textContent = adicionados24h;
             document.getElementById('adicionadosMes').textContent = adicionadosMes;
             document.getElementById('totalVisitas').textContent = totalVisitas.toLocaleString('pt-BR');
             atualizarRelogio();
-
-            // 🔔 SOMENTE aqui verifica mudança de visitas
-            if (visitasAnteriores !== null && totalVisitas !== visitasAnteriores) {
-                TocarSomAviso();
-            }
-            visitasAnteriores = totalVisitas;
 
             const tabela = document.getElementById('tabelaDispositivos');
             tabela.innerHTML = "";
