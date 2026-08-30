@@ -153,14 +153,17 @@
         let totalVisitas = 0;
         let dadosAnteriores = "";
 
-        const somSino = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIuTQAA");
+        // 🔔 Som de notificação confiável — embutido no código
+        let somSino = null;
         function tocarSino() {
-            somSino.currentTime = 0;
-            somSino.play().catch(function(e){});
-            setTimeout(function(){
-                somSino.pause();
+            try {
+                if (!somSino) {
+                    somSino = new Audio("data:audio/wav;base64,UklGRigBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ4BAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIuTQAAAA==");
+                }
                 somSino.currentTime = 0;
-            }, 2000);
+                somSino.volume = 0.8;
+                somSino.play().catch(function(){});
+            } catch(e) {}
         }
 
         function atualizarRelogio() {
