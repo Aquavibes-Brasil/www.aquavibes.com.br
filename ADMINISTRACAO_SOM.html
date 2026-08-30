@@ -44,11 +44,16 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800">
+    <!-- Áudio de Alerta (embutido) -->
+    <audio id="somAlerta" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJN0NEAxQp+PwtM0FAdRDt+D0zQUCq7K/c9TUFAtEHx+PwNQn1iv9P29DUEBUaqD+v4NQcF1x9/3RUEBrJOD+7sFQQBZ3ev+twgEAjBzqP/0KAAAhpGP9+hAAADhVn/6sAAAFaV/3qAAAMN5f9/gAAAw==" type="audio/wav">
+    
+
     <div class="container mx-auto px-4 py-6 max-w-7xl">
         <header class="bg-aqua text-white rounded-xl p-6 mb-8 card-shadow">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-3">
-                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">V1.4</span>
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">V1.1</span>
                     <i class="fa fa-tint text-4xl"></i>
                     <div>
                         <h1 class="text-2xl md:text-3xl font-bold">AquaVibes</h1>
@@ -118,7 +123,7 @@
                         <tr class="bg-gray-100 text-left">
                             <th class="p-3 rounded-l-lg">ID do Dispositivo</th>
                             <th class="p-3">Endereço MAC</th>
-                            <th class="p-3">Status</th>
+                            <th class="p-3 rounded-r-lg">Status</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaDispositivos" class="divide-y divide-gray-200">
@@ -133,6 +138,7 @@
             <p>AquaVibes © 2026 | Sistema de Monitoramento</p>
         </footer>
     </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDV6RsVkCORj9krfMKwHxvAcZ1KuLE63Uk",
@@ -145,22 +151,39 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        // Parâmetros
         const LIMITE_ONLINE = 30 * 1000;
         const LIMITE_24H = 24 * 60 * 60 * 1000;
         const LIMITE_MES = 30 * 24 * 60 * 60 * 1000;
-        // ==========================================================
-        // ✅ LINHA ALTERADA — TEMPO DE ATUALIZAÇÃO
-        // De: const INTERVALO_ATUALIZACAO = 10000;  (10 segundos)
-        // Para: const INTERVALO_ATUALIZACAO = 30 * 1000;  (30 segundos)
-        // ==========================================================
-        const INTERVALO_ATUALIZACAO = 30 * 1000; // ⏱️ 30 segundos
+        const INTERVALO_ATUALIZACAO = 10000;
 
         let snapshotAtual = null;
         let totalVisitas = 0;
 
+        // Variáveis para controle de alterações
+        let valorAnterior_Online = null;
+        let valorAnterior_Visitas = null;
+        let primeiraCarga_Online = true;
+        let primeiraCarga_Visitas = true;
+
+        const somAlerta = document.getElementById('somAlerta');
+
+        function tocarAlerta() {
+            try {
+                somAlerta.currentTime = 0;
+                somAlerta.play().catch(e => {
+                    console.log("Som bloqueado pelo navegador (clique na página primeiro):", e);
+                });
+            } catch (e) {
+                console.log("Erro ao tocar som:", e);
+            }
+        }
+
         function atualizarRelogio() {
             document.getElementById('horaAtualizacao').textContent = new Date().toLocaleTimeString('pt-BR');
         }
+
         function processarDados() {
             if (!snapshotAtual) return;
             const agora = Date.now();
@@ -169,6 +192,7 @@
             let adicionados24h = 0;
             let adicionadosMes = 0;
             const listaDispositivos = [];
+
             snapshotAtual.forEach(dispositivo => {
                 const dados = dispositivo.val();
                 const id = dispositivo.key;
@@ -176,12 +200,21 @@
                 const ultimaAtualizacao = Number(dados?.status?.ultimaAtualizacao) || 0;
                 const dataCadastro = Number(dados?.dataCadastro) || 0;
                 const estaOnline = ultimaAtualizacao > 0 && (agora - ultimaAtualizacao) < LIMITE_ONLINE;
+
                 totalCadastrados++;
                 if (estaOnline) totalOnline++;
                 if (dataCadastro > 0 && (agora - dataCadastro) < LIMITE_24H) adicionados24h++;
                 if (dataCadastro > 0 && (agora - dataCadastro) < LIMITE_MES) adicionadosMes++;
+
                 listaDispositivos.push({ id, mac, estaOnline });
             });
+
+            // 🔔 Verifica ALTERAÇÃO em Dispositivos Online
+            if (!primeiraCarga_Online && valorAnterior_Online !== totalOnline) {
+                tocarAlerta();
+            }
+            valorAnterior_Online = totalOnline;
+            primeiraCarga_Online = false;
 
             document.getElementById('totalCadastrados').textContent = totalCadastrados;
             document.getElementById('totalOnline').textContent = totalOnline;
@@ -189,12 +222,14 @@
             document.getElementById('adicionadosMes').textContent = adicionadosMes;
             document.getElementById('totalVisitas').textContent = totalVisitas.toLocaleString('pt-BR');
             atualizarRelogio();
+
             const tabela = document.getElementById('tabelaDispositivos');
             tabela.innerHTML = "";
             if (listaDispositivos.length === 0) {
                 tabela.innerHTML = `<tr><td colspan="3" class="p-5 text-center text-gray-500">Nenhum dispositivo cadastrado</td></tr>`;
                 return;
             }
+
             listaDispositivos.sort((a, b) => a.id.localeCompare(b.id));
             listaDispositivos.forEach(disp => {
                 const statusClasse = disp.estaOnline ? "bg-green-100 text-green-700 pulse" : "bg-red-100 text-red-700";
@@ -213,15 +248,27 @@
                 tabela.appendChild(linha);
             });
         }
+
         function iniciarMonitoramento() {
             db.ref("dispositivos").on("value", snapshot => {
                 snapshotAtual = snapshot;
                 processarDados();
             });
+
             db.ref("estatisticas/visitas").on("value", snapshot => {
-                totalVisitas = snapshot.val() || 0;
+                const novoValor = snapshot.val() || 0;
+
+                // 🔔 Verifica ALTERAÇÃO em Visitas
+                if (!primeiraCarga_Visitas && valorAnterior_Visitas !== novoValor) {
+                    tocarAlerta();
+                }
+                valorAnterior_Visitas = novoValor;
+                totalVisitas = novoValor;
+                primeiraCarga_Visitas = false;
+
                 processarDados();
             });
+
             setInterval(processarDados, INTERVALO_ATUALIZACAO);
         }
         window.onload = iniciarMonitoramento;
