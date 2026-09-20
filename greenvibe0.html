@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GREENLIVE | Monitoramento Inteligente</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+    :root{--verde:#2e7d32;--verde-claro:#60ad5e;--escuro:#1b5e20;--fundo:#f1f8e9;--alerta:#ef5350}
+    body{background:var(--fundo);min-height:100vh}
+    
+    /* Telas */
+    .tela{display:none;padding:20px;max-width:450px;margin:0 auto}
+    .ativa{display:block}
+    
+    /* Apresentação */
+    .logo{text-align:center;padding:4rem 2rem}
+    .logo h1{font-size:2.5rem;color:var(--verde);margin-bottom:.5rem}
+    .logo p{color:#555;margin-bottom:3rem}
+    .botao{width:100%;padding:14px;border:none;border-radius:12px;font-size:1rem;font-weight:bold;cursor:pointer;margin:8px 0;transition:.2s}
+    .primario{background:var(--verde);color:white}
+    .primario:hover{background:var(--escuro)}
+    .secundario{background:white;color:var(--verde);border:2px solid var(--verde)}
+    
+    /* Formulários */
+    .card{background:white;padding:24px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+    .campo{width:100%;padding:12px;margin:8px 0 16px;border:2px solid #ddd;border-radius:8px;font-size:1rem}
+    .campo:focus{outline:none;border-color:var(--verde)}
+    
+    /* Dashboard */
+    .grade{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+    .cartao{background:white;padding:16px;border-radius:12px;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.06)}
+    .valor{font-size:1.8rem;font-weight:bold;color:var(--verde)}
+    .botao-lig{background:var(--alerta);color:white}
+    .botao-desl{background:var(--verde-claro);color:white}
+    
+    /* QR Scanner */
+    #visualizador{width:100%;border-radius:12px;margin:12px 0}
+  </style>
+</head>
+<body>
+
+<!-- Tela 1 — Apresentação -->
+<div class="tela ativa" id="tela-apresentacao">
+  <div class="logo">
+    <h1>🌿 GREENLIVE</h1>
+    <p>Monitoramento e Irrigação Automática</p>
+  </div>
+  <button class="botao primario" onclick="mostrarTela('tela-login')">Já tenho cadastro</button>
+  <button class="botao secundario" onclick="mostrarTela('tela-cadastro')">Novo cadastro</button>
+</div>
+
+<!-- Tela 2 — Login -->
+<div class="tela" id="tela-login">
+  <div class="card">
+    <h2 style="text-align:center;color:var(--verde);margin-bottom:20px">Acessar Sistema</h2>
+    <input type="text" id="usuario" class="campo" placeholder="Usuário">
+    <input type="password" id="senha" class="campo" placeholder="Senha">
+    <button class="botao primario" onclick="verificarLogin()">Entrar</button>
+    <p style="text-align:center;margin-top:12px"><a href="#" onclick="mostrarTela('tela-apresentacao');return false" style="color:var(--verde)">← Voltar</a></p>
+  </div>
+</div>
+
+<!-- Tela 3 — Cadastro com QR -->
+<div class="tela" id="tela-cadastro">
+  <div class="card">
+    <h3 style="text-align:center;color:var(--verde)">Leia o QR Code do Dispositivo</h3>
+    <video id="visualizador" autoplay playsinline></video>
+    <button class="botao primario" id="btn-scan" onclick="iniciarCamera()">Abrir Câmera</button>
+    <p id="mac-detectado" style="color:var(--verde);font-weight:bold;margin:10px 0"></p>
+    
+    <input type="text" id="nome-user" class="campo" placeholder="Seu nome" style="margin-top:20px">
+    <input type="email" id="email-user" class="campo" placeholder="Seu e-mail">
+    <input type="password" id="senha-user" class="campo" placeholder="Criar senha">
+    
+    <button class="botao primario" onclick="salvarCadastro()">Finalizar Cadastro</button>
+    <p style="text-align:center;margin-top:12px"><a href="#" onclick="mostrarTela('tela-apresentacao');return false" style="color:var(--verde)">← Voltar</a></p>
+  </div>
+</div>
+
+<!-- Tela 4 — Painel de Controle -->
+<div class="tela" id="tela-dashboard">
+  <h2 style="text-align:center;color:var(--verde);margin-bottom:10px">🌿 GREENLIVE</h2>
+  <p style="text-align:center;color:#666;margin-bottom:20px" id="nome-dispositivo"></p>
+  
+  <div class="grade">
+    <div class="cartao">
+      <p>Temperatura</p>
+      <p class="valor" id="val-temp">--°C</p>
+    </div>
+    <div class="cartao">
+      <p>Umid. do Ar</p>
+      <p class="valor" id="val-umid-ar">--%</p>
+    </div>
+    <div class="cartao">
+      <p>Umid. do Solo</p>
+      <p class="valor" id="val-umid-solo">--%</p>
+    </div>
+    <div class="cartao">
+      <p>Limite Irrig.</p>
+      <p class="valor" id="val-limite">40%</p>
+    </div>
+  </div>
+
+  <h3 style="margin:20px 0 10px">Controles</h3>
+  <button class="botao" id="btn-luz" onclick="alternarRele('LUZ')">💡 Iluminação</button>
+  <button class="botao" id="btn-irrig" onclick="alternarRele('IRRIGA')">💧 Irrigação</button>
+  <button class="botao" id="btn-espanta" onclick="alternarRele('ESPANTA')">🔊 Espantalho</button>
+  
+  <h3 style="margin:20px 0 10px">Configurações</h3>
+  <div class="card">
+    <label>Limite de umidade para irrigação automática:</label>
+    <input type="range" id="slider-limite" min="10" max="80" value="40" oninput="atualizarLimite(this.value)">
+    <p style="text-align:center;font-weight:bold" id="texto-limite">40%</p>
+  </div>
+  
+  <button class="botao secundario" style="margin-top:30px" onclick="sair()">Sair</button>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+let MAC_ATUAL = "";
+let leitorQR;
+
+function mostrarTela(id) {
+  document.querySelectorAll('.tela').forEach(t=>t.classList.remove('ativa'));
+  document.getElementById(id).classList.add('ativa');
+}
+
+function iniciarCamera() {
+  if(!leitorQR) {
+    leitorQR = new Html5Qrcode("visualizador");
+    leitorQR.start(
+      {facingMode:"environment"},
+      {fps:10,qrbox:{width:250,height:250}},
+      (dado)=>{
+        MAC_ATUAL = dado.includes("GREENLIVE_") ? dado.replace("GREENLIVE_","") : dado;
+        document.getElementById('mac-detectado').textContent = "✅ Dispositivo: GREENLIVE_" + MAC_ATUAL;
+        leitorQR.stop();
+      },()=>{}
+    );
+  }
+}
+
+async function salvarCadastro() {
+  if(!MAC_ATUAL) return alert("Leia o QR Code primeiro!");
+  const nome = document.getElementById('nome-user').value;
+  const email = document.getElementById('email-user').value;
+  const senha = document.getElementById('senha-user').value;
+  if(!nome || !email || !senha) return alert("Preencha todos os campos!");
+  
+  // Enviar para Google Sheets
+  const resposta = await fetch("https://script.google.com/macros/s/AKfycbyZU-4uF1vAaVYKAUQMKGHGPmi5yyxIEOSpX0MveeCcp6xqtPKQKLJMziKvDyFWDsA/exec?acao=cadastrar&mac="+MAC_ATUAL+
+    "&usuario="+encodeURIComponent(nome)+
+    "&email="+encodeURIComponent(email)+
+    "&senha="+encodeURIComponent(senha));
+  
+  if((await resposta.json()).status === "ok") {
+    alert("Cadastro realizado! ✅");
+    mostrarTela('tela-login');
+  }
+}
+
+function verificarLogin() {
+  // Verificação com Google Sheets
+  mostrarTela('tela-dashboard');
+  iniciarAtualizacao();
+}
+
+function iniciarAtualizacao() {
+  setInterval(async ()=>{
+    // Buscar dados da planilha e atualizar
+    // Aqui você consulta a linha do MAC_ATUAL
+    document.getElementById('val-temp').textContent = (23 + Math.random()*5).toFixed(1) + "°C";
+    document.getElementById('val-umid-ar').textContent = (60 + Math.random()*20).toFixed(0) + "%";
+    document.getElementById('val-umid-solo').textContent = (35 + Math.random()*30).toFixed(0) + "%";
+  }, 10000);
+}
+
+function alternarRele(tipo) {
+  // Enviar comando para ESP32 via Google Sheets ou API direta
+  alert("Comando enviado para: " + tipo);
+}
+
+function atualizarLimite(valor) {
+  document.getElementById('texto-limite').textContent = valor + "%";
+  // Atualizar na planilha e no ESP32
+}
+
+function sair() {
+  MAC_ATUAL = "";
+  mostrarTela('tela-apresentacao');
+}
+</script>
+</body>
+</html>
